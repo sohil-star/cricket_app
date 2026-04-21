@@ -16,7 +16,6 @@ function App() {
 
   const scrollRef = useRef(null);
   
-  // 👇 YAHAN CHANGE HUA HAI: LIVE BACKEND LINK 👇
   const BASE_URL = "https://sohilchauhan.pythonanywhere.com"; 
   const isViewer = window.location.search.includes('view=user');
 
@@ -56,12 +55,25 @@ function App() {
 
   const handleUpdate = (runs, isWicket = false, extraType = null) => {
     if (match?.is_finished) return; 
+    
     if (extraType === 'legbye' && runs === 0) {
       alert("Bhai, Leg Bye ke liye pehle runs select karo phir LB button dabao!");
       return;
     }
-    axios.post(`${BASE_URL}/api/update-score/${selectedMatchId}/`, { runs: parseInt(runs), is_wicket: isWicket, extra_type: extraType })
-      .then(() => { fetchScore(); setPendingRuns(0); });
+
+    // Explicitly defining the payload to ensure backend catches everything properly
+    const payload = {
+      runs: runs ? parseInt(runs) : 0,
+      is_wicket: isWicket,
+      extra_type: extraType
+    };
+
+    axios.post(`${BASE_URL}/api/update-score/${selectedMatchId}/`, payload)
+      .then(() => { 
+        fetchScore(); 
+        setPendingRuns(0); 
+      })
+      .catch(err => alert("Update fail: " + err.response?.data?.error));
   };
 
   const handleUndo = () => {
